@@ -1,29 +1,29 @@
- <p align="center">
+<p align="center">
   <img src="https://lav1n.is-a.dev/Oneko-For-Windows/assets/oneko.ico" alt="Oneko for Windows logo" width="48">
 </p>
 
 <h1 align="center">Oneko for Windows</h1>
 
 <p align="center">
-  A tiny pixel cat that chases your mouse around your Windows desktop.
+  A tiny pixel cat that chases your mouse around your Windows desktop.<br>
   Click-through, customizable, and she pixelates when she walks over a terminal.
 </p>
 
 <p align="center">
-  <a href="[https://github.com/Lavin0503/Oneko-For-Windows/releases/download/v1.0.0/Oneko.exe](https://github.com/Lavin0503/Oneko-For-Windows/releases/download/v1.0.0/Oneko.exe)"><b>⬇ Download Oneko v1.0.0</b></a>
+  <a href="https://github.com/Lavin0503/Oneko-For-Windows/releases/latest/download/Oneko.exe"><b>⬇ Download Oneko</b></a>
   ·
-  <a href="https://lav1n.is-a.dev/Oneko-For-Windows/">Run it on the website</a>
+  <a href="https://lav1n.is-a.dev/Oneko-For-Windows/">Website</a>
+  ·
+  <a href="https://lav1n.is-a.dev">More creations ↗</a>
 </p>
 
 ---
 
 ## ⬇ Download
 
-Download Oneko for Windows directly:
-
 | Platform | Download Link | File Type |
 | :--- | :--- | :--- |
-| **Windows 10 / 11** | [Download Oneko.exe]([https://github.com/Lavin0503/Oneko-For-Windows/releases/download/v1.0.0/Oneko.exe](https://github.com/Lavin0503/Oneko-For-Windows/releases/download/v1.0.0/Oneko.exe)) | `.exe` |
+| **Windows 10 / 11** | [Download Oneko.exe](https://github.com/Lavin0503/Oneko-For-Windows/releases/latest/download/Oneko.exe) | `.exe` |
 
 No installer is needed. Just download `Oneko.exe` and run it!
 
@@ -33,8 +33,13 @@ No installer is needed. Just download `Oneko.exe` and run it!
 
 - **The real Oneko:** 8-direction running, the "!" alert pose, scratching, yawning and napping with Zs.
 - **Click-through:** She never blocks a button or link. Click straight through her.
-- **Customizable:** Change cat size, opacity, running speed, animation speed, follow distance, sleepiness, sprinting and choose from 7 cat colours.
+- **Works on every monitor:** Per-monitor DPI support, so she can follow you across multiple screens.
+- **Scratches the screen edge:** Park your cursor at the edge of a screen and she runs over to claw the wall.
+- **Customizable:** Cat size, opacity, running speed, animation speed, follow distance, sleepiness, sprinting and 7 cat colours.
+- **Scaredy cat mode:** Flip the game: she runs away from your cursor instead of chasing it.
 - **Terminal Version:** When she walks over CMD, PowerShell, Windows Terminal, Git Bash or WSL, she turns into chunky pixels, with an optional green phosphor tint.
+- **Startup animation:** She pixel-pops in when she starts (can be turned off).
+- **Hides in fullscreen apps:** She stays out of the way during games and videos.
 - **Beautiful settings window:** A modern, animated interface with tabs, sliders and a live cat preview.
 - **System tray:** Access settings, pause the cat or quit directly from the system tray.
 - **Tiny and portable:** One small `.exe`. No installer and no administrator rights required.
@@ -43,7 +48,7 @@ No installer is needed. Just download `Oneko.exe` and run it!
 
 ## 🐱 Installation
 
-1. Download **Oneko.exe** from the [v1.0.0 release](https://github.com/Lavin0503/Oneko-For-Windows/releases/download/v1.0.0/Oneko.exe).
+1. Download **Oneko.exe** from the [latest release](https://github.com/Lavin0503/Oneko-For-Windows/releases/latest).
 2. Double-click the downloaded file.
 3. If Windows SmartScreen displays an unknown publisher warning, click **More info → Run anyway**.
 4. Find the Oneko cat icon in your system tray, near the clock.
@@ -55,14 +60,12 @@ No installer is needed. Just download `Oneko.exe` and run it!
 
 ## 🎛️ Settings
 
-Oneko comes with a customizable settings window.
-
 | Tab | What you can change |
 | :--- | :--- |
 | **Cat** | Size, opacity, animation speed and cat colour |
-| **Behavior** | Running speed, follow distance, sleepiness, sprint and wall scratching |
+| **Behavior** | Running speed, follow distance, sleepiness, sprint, edge scratching and scaredy cat mode |
 | **Terminal** | Terminal Version on/off, pixelation strength and green tint |
-| **General** | Keep on top, start with Windows and open settings on launch |
+| **General** | Keep on top, start with Windows, open settings on launch, startup animation and hide in fullscreen apps |
 
 Settings save automatically to:
 
@@ -112,7 +115,7 @@ To host it with GitHub Pages:
 
 ## 🔗 Links
 
-- **Download v1.0.0:** https://github.com/Lavin0503/Oneko-For-Windows/releases/download/v1.0.0/Oneko.exe
+- **Download:** [Oneko.exe](https://github.com/Lavin0503/Oneko-For-Windows/releases/latest/download/Oneko.exe)
 - **Releases:** https://github.com/Lavin0503/Oneko-For-Windows/releases
 - **Repository:** https://github.com/Lavin0503/Oneko-For-Windows
 - **Website:** https://lav1n.is-a.dev/Oneko-For-Windows/
