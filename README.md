@@ -1,5 +1,5 @@
  <p align="center">
-  <img src="logo.svg" alt="Oneko for Windows logo" width="80">
+  <img src="https://lav1n.is-a.dev/Oneko-For-Windows/assets/oneko.ico" alt="Oneko for Windows logo" width="48">
 </p>
 
 <h1 align="center">Oneko for Windows</h1>
@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Lav1nRules/Oneko-for-Windows/releases/latest"><b>⬇ Download Releases</b></a>
+  <a href="https://github.com/Lavin0503/Oneko-For-Windows/releases/download/v1.0.0/Oneko.exe"><b>⬇ Download Oneko v1.0.0</b></a>
   ·
   <a href="https://lav1n.is-a.dev/Oneko-For-Windows/">Run it on the website</a>
 </p>
@@ -19,13 +19,13 @@
 
 ## ⬇ Download
 
-Download the latest version of Oneko for Windows directly from GitHub Releases.
+Download Oneko for Windows directly:
 
 | Platform | Download Link | File Type |
 | :--- | :--- | :--- |
-| **Windows 10 / 11** | [Download Oneko.exe](https://github.com/Lav1nRules/Oneko-for-Windows/releases/latest) | `.exe` |
+| **Windows 10 / 11** | [Download Oneko.exe](https://github.com/Lavin0503/Oneko-For-Windows/releases/download/v1.0.0/Oneko.exe) | `.exe` |
 
-No installer is needed. Just download Oneko.exe and run it!
+No installer is needed. Just download `Oneko.exe` and run it!
 
 ---
 
@@ -43,7 +43,7 @@ No installer is needed. Just download Oneko.exe and run it!
 
 ## 🐱 Installation
 
-1. Download **Oneko.exe** from the [latest GitHub Release](https://github.com/Lav1nRules/Oneko-for-Windows/releases/latest).
+1. Download **Oneko.exe** from the [v1.0.0 release](https://github.com/Lavin0503/Oneko-For-Windows/releases/download/v1.0.0/Oneko.exe).
 2. Double-click the downloaded file.
 3. If Windows SmartScreen displays an unknown publisher warning, click **More info → Run anyway**.
 4. Find the Oneko cat icon in your system tray, near the clock.
@@ -112,8 +112,9 @@ To host it with GitHub Pages:
 
 ## 🔗 Links
 
-- **Releases:** https://github.com/Lav1nRules/Oneko-for-Windows/releases
-- **Repository:** https://github.com/Lav1nRules/Oneko-for-Windows
+- **Download v1.0.0:** https://github.com/Lavin0503/Oneko-For-Windows/releases/download/v1.0.0/Oneko.exe
+- **Releases:** https://github.com/Lavin0503/Oneko-For-Windows/releases
+- **Repository:** https://github.com/Lavin0503/Oneko-For-Windows
 - **Website:** https://lav1n.is-a.dev/Oneko-For-Windows/
 - **More Projects:** https://lav1n.is-a.dev
 
