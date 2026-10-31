@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Oneko for Windows</title>
 <meta name="description" content="A tiny pixel cat that chases your mouse across your Windows desktop.">
+<link rel="icon" href="https://lav1n.is-a.dev/Oneko-For-Windows/assets/oneko.ico" type="image/x-icon">
+<link rel="shortcut icon" href="https://lav1n.is-a.dev/Oneko-For-Windows/assets/oneko.ico" type="image/x-icon">
+<link rel="apple-touch-icon" href="https://lav1n.is-a.dev/Oneko-For-Windows/assets/oneko.ico">
 <style>
 :root{--bg:#f6f5fc;--card:#fff;--line:#e3e0f2;--tx:#1b1a2e;--mut:#6a6786;--a:#7a68f5;--p:#f0559b;--c:#2bb6ee;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12131d;--card:#1b1d2c;--line:#2c2f46;--tx:#ecedfa;--mut:#9096b5;--a:#8b7cff;--p:#ff7ab8}}
@@ -15,7 +18,7 @@ body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.55 "Segoe UI",sys
 a{color:inherit;text-decoration:none}
 .w{max-width:860px;margin:0 auto;padding:0 20px}
 nav{display:flex;align-items:center;justify-content:space-between;padding:12px 0}
-nav b{font-size:16px}nav div a{margin-left:18px;color:var(--mut);font-weight:600;font-size:13px}nav div a:hover{color:var(--tx)}
+nav b{font-size:16px}nav .brand{display:flex;align-items:center;gap:8px}nav .brand img{width:28px;height:28px;object-fit:contain;image-rendering:pixelated}nav div a{margin-left:18px;color:var(--mut);font-weight:600;font-size:13px}nav div a:hover{color:var(--tx)}
 .hero{text-align:center;padding:34px 0 44px}
 .pill{display:inline-block;padding:4px 12px;border:1px solid var(--line);border-radius:99px;color:var(--mut);font-size:12px;font-weight:600;background:var(--card)}
 h1{font-size:clamp(30px,6vw,46px);line-height:1.08;margin:16px 0 10px;letter-spacing:-1px}
@@ -44,14 +47,14 @@ section{padding:32px 0}.sub{color:var(--mut);margin:0 0 18px;max-width:520px;fon
 .steps{padding:0;margin:0}
 footer{margin-top:12px;padding:36px 0 44px;text-align:center;border-top:1px solid var(--line)}
 footer p{color:var(--mut)}
-#cat{position:fixed;left:0;top:0;width:64px;height:64px;background:0 0/512px 256px no-repeat;image-rendering:pixelated;pointer-events:none;z-index:50}
+#cat{position:fixed;left:0;top:0;width:40px;height:40px;background:0 0/320px 160px no-repeat;image-rendering:pixelated;pointer-events:none;z-index:50}
 @media (prefers-reduced-motion:reduce){#cat{display:none}.card,.btn{transition:none}}
 </style>
 </head>
 <body>
 <div id="cat" aria-hidden="true"></div>
 <div class="w">
-<nav><b>🐱 Oneko</b><div><a href="#features">Features</a><a href="#terminal">Terminal</a><a href="#download">Download</a></div></nav>
+<nav><b class="brand"><img src="https://lav1n.is-a.dev/Oneko-For-Windows/assets/oneko.ico" alt="" width="28" height="28"> Oneko</b><div><a href="#features">Features</a><a href="#terminal">Terminal</a><a href="#download">Download</a></div></nav>
 
 <header class="hero">
 <span class="pill">v2.0 &nbsp;·&nbsp; free &nbsp;·&nbsp; one tiny .exe</span>
@@ -61,19 +64,6 @@ footer p{color:var(--mut)}
 <a class="btn b2" href="https://github.com/Lav1nRules/Oneko-for-Windows">View on GitHub</a>
 <div class="hint">Go on, move your mouse — she’s already after it. 🐾</div>
 </header>
-
-<section id="features">
-<h2>Everything a desktop cat needs</h2>
-<p class="sub">The real Oneko sprites, a gorgeous settings window, and a few tricks of its own.</p>
-<div class="grid">
-<div class="card"><i>🖱️</i><h3>Click-through</h3><p>Click buttons and links right under her. She’s only there to be adorable.</p></div>
-<div class="card"><i>🐈</i><h3>The real Oneko</h3><p>Eight-direction running, the “!” alert pose, scratching, yawning, napping with Zs.</p></div>
-<div class="card"><i>🎛️</i><h3>Customizable</h3><p>Size, speed, opacity, follow distance, sleepiness, sprinting and 7 cat colors.</p></div>
-<div class="card"><i>💻</i><h3>Terminal Version</h3><p>Walk over cmd, PowerShell or Windows Terminal and she turns into chunky pixels.</p></div>
-<div class="card"><i>✨</i><h3>Beautiful settings</h3><p>A modern, animated window with tabs, sliders and a live cat preview.</p></div>
-<div class="card"><i>🪶</i><h3>Tiny and portable</h3><p>One small .exe. No installer, no admin rights, no background bloat.</p></div>
-</div>
-</section>
 
 <section id="terminal">
 <h2>Terminal Version</h2>
@@ -111,8 +101,8 @@ const cat=document.getElementById('cat');cat.style.backgroundImage=`url(${SHEET}
 const S={idle:[[3,3]],alert:[[7,3]],tired:[[3,2]],sleep:[[2,0],[2,1]],scratch:[[5,0],[6,0],[7,0]],
 N:[[1,2],[1,3]],NE:[[0,2],[0,3]],E:[[3,0],[3,1]],SE:[[5,1],[5,2]],S:[[6,3],[7,2]],SW:[[5,3],[6,1]],W:[[4,2],[4,3]],NW:[[1,0],[1,1]]};
 let x=90,y=170,mx=null,my=null,f=0,idle=0;
-const set=(n,i)=>{const a=S[n],p=a[i%a.length];cat.style.backgroundPosition=`${-p[0]*64}px ${-p[1]*64}px`};
-const place=()=>{cat.style.transform=`translate(${x-32}px,${y-32}px)`};
+const set=(n,i)=>{const a=S[n],p=a[i%a.length];cat.style.backgroundPosition=`${-p[0]*40}px ${-p[1]*40}px`};
+const place=()=>{cat.style.transform=`translate(${x-20}px,${y-20}px)`};
 addEventListener('pointermove',e=>{mx=e.clientX;my=e.clientY},{passive:true});
 setInterval(()=>{
  f++;
@@ -126,8 +116,8 @@ setInterval(()=>{
  idle=0;
  const dir=(dy/d>.5?'N':'')+(dy/d<-.5?'S':'')+(dx/d>.5?'W':'')+(dx/d<-.5?'E':'');
  set(dir,f);
- x=Math.max(32,Math.min(innerWidth-32,x-dx/d*10));
- y=Math.max(32,Math.min(innerHeight-32,y-dy/d*10));
+ x=Math.max(20,Math.min(innerWidth-20,x-dx/d*10));
+ y=Math.max(20,Math.min(innerHeight-20,y-dy/d*10));
  place();
 },100);
 place();set('idle',0);
