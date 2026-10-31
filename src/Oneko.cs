@@ -175,7 +175,7 @@ static class Sprites
 static class Cfg
 {
     public static int Speed = 10, Size = 2, Anim = 5, Follow = 48, Sleepy = 2, Opacity = 100, ColorIdx = 0, Pixel = 2;
-    public static bool OnTop = true, Sprint = false, WallScratch = true, Terminal = true, TermTint = false, OpenOnLaunch = true;
+    public static bool OnTop = true, Sprint = false, WallScratch = true, Terminal = true, TermTint = false, OpenOnLaunch = true, Flee = false, HideFullscreen = true, StartAnim = true;
     public static bool Paused = false;   // not saved
     public static event EventHandler Changed;
 
@@ -196,7 +196,7 @@ static class Cfg
     public static void Defaults()
     {
         Speed = 10; Size = 2; Anim = 5; Follow = 48; Sleepy = 2; Opacity = 100; ColorIdx = 0; Pixel = 2;
-        OnTop = true; Sprint = false; WallScratch = true; Terminal = true; TermTint = false; OpenOnLaunch = true;
+        OnTop = true; Sprint = false; WallScratch = true; Terminal = true; TermTint = false; OpenOnLaunch = true; Flee = false; HideFullscreen = true; StartAnim = true;
     }
 
     public static void Load()
@@ -229,6 +229,9 @@ static class Cfg
                     case "Terminal": Terminal = b; break;
                     case "Tint": TermTint = b; break;
                     case "OpenOnLaunch": OpenOnLaunch = b; break;
+                    case "Flee": Flee = b; break;
+                    case "FullscreenHide": HideFullscreen = b; break;
+                    case "StartAnim": StartAnim = b; break;
                 }
             }
         }
@@ -246,7 +249,7 @@ static class Cfg
                 "Speed=" + Speed + "\r\nSize=" + Size + "\r\nAnim=" + Anim + "\r\nFollow=" + Follow +
                 "\r\nSleepy=" + Sleepy + "\r\nOpacity=" + Opacity + "\r\nColor=" + ColorIdx + "\r\nPixel=" + Pixel +
                 "\r\nOnTop=" + B(OnTop) + "\r\nSprint=" + B(Sprint) + "\r\nWall=" + B(WallScratch) +
-                "\r\nTerminal=" + B(Terminal) + "\r\nTint=" + B(TermTint) + "\r\nOpenOnLaunch=" + B(OpenOnLaunch) + "\r\n");
+                "\r\nTerminal=" + B(Terminal) + "\r\nTint=" + B(TermTint) + "\r\nOpenOnLaunch=" + B(OpenOnLaunch) + "\r\nFlee=" + B(Flee) + "\r\nFullscreenHide=" + B(HideFullscreen) + "\r\nStartAnim=" + B(StartAnim) + "\r\n");
         }
         catch { }
     }
@@ -278,6 +281,7 @@ static class TermDetect
     [DllImport("user32.dll")] static extern int GetWindowLong(IntPtr h, int idx);
     [DllImport("user32.dll", CharSet = CharSet.Auto)] static extern int GetClassName(IntPtr h, StringBuilder sb, int max);
     [DllImport("user32.dll")] static extern uint GetWindowThreadProcessId(IntPtr h, out uint pid);
+    [DllImport("user32.dll")] static extern IntPtr GetForegroundWindow();
     [DllImport("dwmapi.dll")] static extern int DwmGetWindowAttribute(IntPtr h, int attr, out int val, int size);
 
     static bool broken = false;
@@ -305,6 +309,30 @@ static class TermDetect
         try { n = System.Diagnostics.Process.GetProcessById((int)pid).ProcessName; } catch { n = ""; }
         names[pid] = n;
         return n;
+    }
+
+    // true while a borderless full-screen app (game, video) is in front
+    public static bool FullscreenForeground()
+    {
+        if (broken) return false;
+        try
+        {
+            IntPtr h = GetForegroundWindow();
+            if (h == IntPtr.Zero) return false;
+            uint pid;
+            GetWindowThreadProcessId(h, out pid);
+            if (pid == myPid) return false;
+            StringBuilder sb = new StringBuilder(64);
+            GetClassName(h, sb, 64);
+            string c = sb.ToString();
+            if (c == "Progman" || c == "WorkerW" || c == "Shell_TrayWnd") return false;
+            if ((GetWindowLong(h, -16) & 0xC00000) == 0xC00000) return false;   // has a title bar: just maximised
+            RECT r;
+            if (!GetWindowRect(h, out r)) return false;
+            Rectangle b = Screen.FromHandle(h).Bounds;
+            return r.Left <= b.Left && r.Top <= b.Top && r.Right >= b.Right && r.Bottom >= b.Bottom;
+        }
+        catch { return false; }
     }
 
     // the first visible, non-click-through window (top of the z-order down) containing the point decides
@@ -363,8 +391,8 @@ class CatForm : Form
     string idleAnim = null;
     Rectangle src = Sprites.Src("idle", 0);
 
-    bool overTerm;
-    float termT;
+    bool overTerm, wasPaused, fsHidden, lastStartAnim;
+    float termT, spawnP = 1f;
     int curBlock = 1;
     bool curTint;
 
@@ -384,22 +412,42 @@ class CatForm : Form
         fx.Interval = 30;
         fx.Tick += OnFx;
         Cfg.Changed += delegate { ApplyCfg(); };
+        wasPaused = Cfg.Paused;
+        lastStartAnim = Cfg.StartAnim;
+        StartSpawn();
         ApplyCfg();
+    }
+
+    static float Ease(float t) { return 1f - (float)Math.Pow(1f - Math.Max(0f, Math.Min(1f, t)), 3); }
+
+    // startup animation: the cat resolves out of big pixels while fading in
+    void StartSpawn() { spawnP = Cfg.StartAnim ? 0f : 1f; }
+
+    void UpdateOpacity()
+    {
+        double f = spawnP < 1f ? Math.Min(1f, spawnP * 2.5f) : 1f;
+        Opacity = Cfg.Opacity / 100.0 * f;
     }
 
     void ApplyCfg()
     {
+        if (wasPaused && !Cfg.Paused) StartSpawn();
+        if (!lastStartAnim && Cfg.StartAnim) StartSpawn();   // toggled on: replay it as a preview
+        wasPaused = Cfg.Paused;
+        lastStartAnim = Cfg.StartAnim;
+
         mult = Cfg.Size;
         cellPx = Sprites.Cell * mult;
         ClientSize = new Size(cellPx, cellPx);
         TopMost = Cfg.OnTop;
-        Opacity = Cfg.Opacity / 100.0;
+        UpdateOpacity();
         timer.Interval = 150 - 10 * Cfg.Anim;
         timer.Enabled = !Cfg.Paused;
         fx.Enabled = !Cfg.Paused;
         MoveWindow();
-        if (Cfg.Paused && Visible) Hide();
-        else if (!Cfg.Paused && !Visible) Show();
+        bool hide = Cfg.Paused || fsHidden;
+        if (hide && Visible) Hide();
+        else if (!hide && !Visible) Show();
         Invalidate();
     }
 
@@ -425,7 +473,7 @@ class CatForm : Form
         Sprites.DrawPix(g, new RectangleF(0, 0, cellPx, cellPx), src, curBlock, curTint);
     }
 
-    // smooth "getting pixelated" transition
+    // smooth pixelate transitions (terminal + startup)
     void OnFx(object sender, EventArgs ev)
     {
         bool want = Cfg.Terminal && overTerm && !Cfg.Paused;
@@ -433,6 +481,12 @@ class CatForm : Form
         if (termT < 0f) termT = 0f;
         if (termT > 1f) termT = 1f;
         int blk = 1 + (int)Math.Round(termT * (Cfg.Pixel - 1));
+        if (spawnP < 1f)
+        {
+            spawnP = Math.Min(1f, spawnP + 0.03f / 0.9f);
+            blk = Math.Max(blk, 1 + (int)Math.Round((1f - Ease(spawnP)) * 7f));
+            UpdateOpacity();
+        }
         bool tint = Cfg.TermTint && termT > 0.5f;
         if (blk != curBlock || tint != curTint) { curBlock = blk; curTint = tint; Invalidate(); }
     }
@@ -453,23 +507,42 @@ class CatForm : Form
 
     void ResetIdle() { idleAnim = null; idleAnimFrame = 0; }
 
+    // ---- real screen edges (works across several monitors) ----
+    static bool IsOutside(int x, int y)
+    {
+        foreach (Screen sc in Screen.AllScreens)
+            if (sc.Bounds.Contains(x, y)) return false;
+        return true;
+    }
+
+    bool NearWall(Point m)
+    {
+        int pad = cellPx * 3 / 2;
+        return IsOutside(m.X - pad, m.Y) || IsOutside(m.X + pad, m.Y) || IsOutside(m.X, m.Y - pad) || IsOutside(m.X, m.Y + pad);
+    }
+
+    // which wall (W/E/N/S) is the cat up against, with the cursor on that side?
+    string WallAtCat()
+    {
+        Point m = Cursor.Position;
+        int pad = cellPx * 3 / 2;
+        if (IsOutside((int)px - pad, (int)py) && m.X < px + 8) return "W";
+        if (IsOutside((int)px + pad, (int)py) && m.X > px - 8) return "E";
+        if (IsOutside((int)px, (int)py - pad) && m.Y < py + 8) return "N";
+        if (IsOutside((int)px, (int)py + pad) && m.Y > py - 8) return "S";
+        return null;
+    }
+
     void Idle()
     {
         idleTime++;
 
-        if (Cfg.Sleepy > 0 && idleTime > 10 && idleAnim == null && rnd.Next(400 / Cfg.Sleepy) == 0)
+        if (idleAnim == null)
         {
-            List<string> avail = new List<string> { "sleeping", "scratchSelf" };
-            if (Cfg.WallScratch)
-            {
-                Rectangle b = SystemInformation.VirtualScreen;
-                int edge = cellPx * 2;
-                if (px < b.Left + edge) avail.Add("scratchWallW");
-                if (py < b.Top + edge) avail.Add("scratchWallN");
-                if (px > b.Right - edge) avail.Add("scratchWallE");
-                if (py > b.Bottom - edge) avail.Add("scratchWallS");
-            }
-            idleAnim = avail[rnd.Next(avail.Count)];
+            string wall = (Cfg.WallScratch && !Cfg.Flee) ? WallAtCat() : null;
+            if (wall != null && idleTime > 2) idleAnim = "scratchWall" + wall;
+            else if (Cfg.Sleepy > 0 && idleTime > 10 && rnd.Next(400 / Cfg.Sleepy) == 0)
+                idleAnim = rnd.Next(2) == 0 ? "sleeping" : "scratchSelf";
         }
 
         switch (idleAnim)
@@ -497,6 +570,11 @@ class CatForm : Form
     void OnTick(object sender, EventArgs ev)
     {
         frameCount++;
+
+        bool fs = Cfg.HideFullscreen && TermDetect.FullscreenForeground();
+        if (fs != fsHidden) { fsHidden = fs; ApplyCfg(); }
+        if (fsHidden) return;
+
         overTerm = Cfg.Terminal && TermDetect.IsTerminalAt((int)px, (int)py);
 #if TERMTEST
         overTerm = Cfg.Terminal;
@@ -505,9 +583,19 @@ class CatForm : Form
         int speed = Cfg.Speed * mult;
         Point m = Cursor.Position;
         double dx = px - m.X, dy = py - m.Y;
-        double dist = Math.Sqrt(dx * dx + dy * dy);
+        double dist = Math.Max(1.0, Math.Sqrt(dx * dx + dy * dy));
+        double stop = Cfg.Follow * mult;
 
-        if (dist < speed || dist < Cfg.Follow * mult) { Idle(); return; }
+        if (Cfg.Flee)
+        {
+            if (dist > stop * 3.5) { Idle(); return; }
+            dx = -dx; dy = -dy;                 // run away instead of toward
+        }
+        else
+        {
+            if (Cfg.WallScratch && NearWall(m)) stop = cellPx * 0.6;   // cursor parked at an edge: go claw the wall
+            if (dist < speed || dist < stop) { Idle(); return; }
+        }
 
         ResetIdle();
 
@@ -519,7 +607,7 @@ class CatForm : Form
             return;
         }
 
-        if (Cfg.Sprint && dist > 220 * mult) speed *= 2;
+        if (Cfg.Sprint && !Cfg.Flee && dist > 220 * mult) speed *= 2;
 
         string dir = "";
         if (dy / dist > 0.5) dir += "N";
@@ -663,11 +751,7 @@ class SettingsForm : Form
         SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer | ControlStyles.UserPaint, true);
         Opacity = 0;
 
-        try
-        {
-            using (Graphics g = Graphics.FromHwnd(IntPtr.Zero)) s = g.DpiX / 96f;
-            if (Screen.PrimaryScreen.Bounds.Height >= 1400 && s < 1.25f) s = 1.25f;
-        }
+        try { using (Graphics g = Graphics.FromHwnd(IntPtr.Zero)) s = ScaleFor((int)g.DpiX); }
         catch { s = 1f; }
         ClientSize = new Size((int)Math.Round(W * s), (int)Math.Round(H * s));
 
@@ -735,14 +819,16 @@ class SettingsForm : Form
         // --- Behavior tab
         AddSlider(1, "Run speed", "how fast she runs", 1, 40, x, y0, w,
             delegate { return Cfg.Speed; }, delegate (int v) { Cfg.Speed = v; }, delegate (int v) { return v.ToString(); });
-        AddSlider(1, "Follow distance", "how close she gets", 16, 200, x, y0 + 62, w,
+        AddSlider(1, "Follow distance", "how close she gets", 16, 200, x, y0 + 54, w,
             delegate { return Cfg.Follow; }, delegate (int v) { Cfg.Follow = v; }, delegate (int v) { return v + " px"; });
-        AddSlider(1, "Sleepiness", "naps and scratching", 0, 10, x, y0 + 124, w,
+        AddSlider(1, "Sleepiness", "naps and scratching", 0, 10, x, y0 + 108, w,
             delegate { return Cfg.Sleepy; }, delegate (int v) { Cfg.Sleepy = v; }, delegate (int v) { return v == 0 ? "Off" : v.ToString(); });
-        AddToggle(1, "Sprint when far away", "runs faster to catch up", x, y0 + 194, w,
+        AddToggle(1, "Sprint when far away", "runs faster to catch up", x, y0 + 156, w,
             delegate { return Cfg.Sprint; }, delegate { Cfg.Sprint = !Cfg.Sprint; Cfg.Save(); Cfg.Notify(); });
-        AddToggle(1, "Scratch screen edges", "claws at the walls when idle", x, y0 + 240, w,
+        AddToggle(1, "Scratch screen edges", "claws the wall when you park the cursor there", x, y0 + 194, w,
             delegate { return Cfg.WallScratch; }, delegate { Cfg.WallScratch = !Cfg.WallScratch; Cfg.Save(); Cfg.Notify(); });
+        AddToggle(1, "Scaredy cat mode", "runs away from your cursor", x, y0 + 232, w,
+            delegate { return Cfg.Flee; }, delegate { Cfg.Flee = !Cfg.Flee; Cfg.Save(); Cfg.Notify(); });
 
         // --- Terminal tab
         AddText(2, "When the cat walks over a terminal (cmd, PowerShell, Windows Terminal, Git Bash, WSL...) she turns into chunky pixels.",
@@ -758,13 +844,16 @@ class SettingsForm : Form
         // --- General tab
         AddToggle(3, "Keep on top", "stay above other windows", x, y0, w,
             delegate { return Cfg.OnTop; }, delegate { Cfg.OnTop = !Cfg.OnTop; Cfg.Save(); Cfg.Notify(); });
-        AddToggle(3, "Start with Windows", "launch quietly at login", x, y0 + 46, w,
+        AddToggle(3, "Start with Windows", "launch quietly at login", x, y0 + 44, w,
             delegate { return autostart; }, delegate { autostart = !autostart; SetAutostart(autostart); });
-        AddToggle(3, "Open settings on launch", "turn off to start in the tray", x, y0 + 92, w,
+        AddToggle(3, "Open settings on launch", "turn off to start in the tray", x, y0 + 88, w,
             delegate { return Cfg.OpenOnLaunch; }, delegate { Cfg.OpenOnLaunch = !Cfg.OpenOnLaunch; Cfg.Save(); });
-        AddText(3, "Oneko is a tiny cat that chases your mouse around the screen. She is click-through, so she never gets in the way of your clicks.",
-            x, y0 + 158, w, 40, false);
-        AddText(3, "Oneko for Windows  v2.0   |   made by Lav1nRules", x, y0 + 208, w, 20, true);
+        AddToggle(3, "Startup animation", "the cat pixel-pops in when she starts", x, y0 + 132, w,
+            delegate { return Cfg.StartAnim; }, delegate { Cfg.StartAnim = !Cfg.StartAnim; Cfg.Save(); Cfg.Notify(); });
+        AddToggle(3, "Hide in fullscreen apps", "hides during games and videos", x, y0 + 176, w,
+            delegate { return Cfg.HideFullscreen; }, delegate { Cfg.HideFullscreen = !Cfg.HideFullscreen; Cfg.Save(); Cfg.Notify(); });
+        AddText(3, "She is click-through, so she never blocks your clicks.", x, y0 + 228, w, 18, false);
+        AddText(3, "Oneko for Windows  v1.1.0   |   made by Lav1nRules", x, y0 + 252, w, 20, true);
 
         // --- right column
         float bx = promoCard.X, bw = promoCard.Width;
@@ -820,6 +909,26 @@ class SettingsForm : Form
         buttons.Add(b);
     }
 
+    static float ScaleFor(int dpi)
+    {
+        float v = dpi / 96f;
+        try { if (Screen.PrimaryScreen.Bounds.Height >= 1400 && v < 1.25f) v = 1.25f; } catch { }
+        return v;
+    }
+
+    // dragging the window to a monitor with different scaling: resize to match
+    protected override void WndProc(ref Message m)
+    {
+        if (m.Msg == 0x02E0)   // WM_DPICHANGED
+        {
+            s = ScaleFor((int)((long)m.WParam & 0xFFFF));
+            ClientSize = new Size((int)Math.Round(W * s), (int)Math.Round(H * s));
+            Invalidate();
+            return;
+        }
+        base.WndProc(ref m);
+    }
+
     // ---------------------------------------------------------- window plumbing
     protected override CreateParams CreateParams
     {
@@ -847,7 +956,7 @@ class SettingsForm : Form
 
     public void ShowSettings()
     {
-        if (!Visible || WindowState == FormWindowState.Minimized) { intro = 0f; Opacity = 0; }
+        if (!Visible || WindowState == FormWindowState.Minimized) { intro = 0f; Opacity = 0; catX = stage.Left - 80f; idleT = 0f; alertT = 0f; }
         Show();
         if (WindowState == FormWindowState.Minimized) WindowState = FormWindowState.Normal;
         TopMost = true; TopMost = false;   // nudge to the front
@@ -990,6 +1099,7 @@ class SettingsForm : Form
             target = Math.Max(minX, Math.Min(maxX, mx - 32));
             chase = Math.Abs(target - catX) > 26f;
         }
+        if (intro < 1.5f) { target = stage.X + stage.Width / 2f - 32f; chase = Math.Abs(target - catX) > 6f; }   // run-in on startup
         if (Cfg.Paused) idleT = Math.Max(idleT, 4f);
 
         if (chase && idleT > 0.8f && alertT <= 0f) { alertT = 0.35f; idleT = 0f; }
@@ -1596,6 +1706,7 @@ class Ctx : ApplicationContext
 static class Program
 {
     [DllImport("user32.dll")] static extern bool SetProcessDPIAware();
+    [DllImport("user32.dll")] static extern bool SetProcessDpiAwarenessContext(IntPtr value);
     [DllImport("user32.dll")] static extern bool AllowSetForegroundWindow(int pid);
 
     [STAThread]
@@ -1613,7 +1724,8 @@ static class Program
             return;
         }
 
-        try { SetProcessDPIAware(); } catch { }
+        try { if (!SetProcessDpiAwarenessContext(new IntPtr(-4))) SetProcessDPIAware(); }   // per-monitor aware: coordinates stay correct across several monitors
+        catch { try { SetProcessDPIAware(); } catch { } }
         Application.EnableVisualStyles();
         Sprites.Load();
         Cfg.Load();
