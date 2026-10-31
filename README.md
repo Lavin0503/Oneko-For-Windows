@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Lavin0503/Oneko-For-Windows/releases/download/v1.0.0/Oneko.exe"><b>⬇ Download Oneko v1.0.0</b></a>
+  <a href="[https://github.com/Lavin0503/Oneko-For-Windows/releases/download/v1.0.0/Oneko.exe](https://github.com/Lavin0503/Oneko-For-Windows/releases/download/v1.0.0/Oneko.exe)"><b>⬇ Download Oneko v1.0.0</b></a>
   ·
   <a href="https://lav1n.is-a.dev/Oneko-For-Windows/">Run it on the website</a>
 </p>
@@ -23,7 +23,7 @@ Download Oneko for Windows directly:
 
 | Platform | Download Link | File Type |
 | :--- | :--- | :--- |
-| **Windows 10 / 11** | [Download Oneko.exe](https://github.com/Lavin0503/Oneko-For-Windows/releases/download/v1.0.0/Oneko.exe) | `.exe` |
+| **Windows 10 / 11** | [Download Oneko.exe]([https://github.com/Lavin0503/Oneko-For-Windows/releases/download/v1.0.0/Oneko.exe](https://github.com/Lavin0503/Oneko-For-Windows/releases/download/v1.0.0/Oneko.exe)) | `.exe` |
 
 No installer is needed. Just download `Oneko.exe` and run it!
 
