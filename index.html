@@ -48,20 +48,24 @@ section{padding:32px 0}.sub{color:var(--mut);margin:0 0 18px;max-width:520px;fon
 footer{margin-top:12px;padding:36px 0 44px;text-align:center;border-top:1px solid var(--line)}
 footer p{color:var(--mut)}
 #cat{position:fixed;left:0;top:0;width:40px;height:40px;background:0 0/320px 160px no-repeat;image-rendering:pixelated;pointer-events:none;z-index:50}
-@media (prefers-reduced-motion:reduce){#cat{display:none}.card,.btn{transition:none}}
+@keyframes up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+nav{animation:up .5s backwards}
+.hero>*{animation:up .7s backwards}.hero>:nth-child(2){animation-delay:.1s}.hero>:nth-child(3){animation-delay:.2s}.hero>:nth-child(4){animation-delay:.3s}.hero>:nth-child(5){animation-delay:.36s}.hero>:nth-child(6){animation-delay:.46s}
+.rv{opacity:0;transform:translateY(18px);transition:opacity .7s,transform .7s}.rv.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){#cat{display:none}.card,.btn{transition:none}nav,.hero>*{animation:none}.rv{opacity:1;transform:none;transition:none}}
 </style>
 </head>
 <body>
 <div id="cat" aria-hidden="true"></div>
 <div class="w">
-<nav><b class="brand"><img src="https://lav1n.is-a.dev/Oneko-For-Windows/assets/oneko.ico" alt="" width="28" height="28"> Oneko</b><div><a href="#features">Features</a><a href="#terminal">Terminal</a><a href="#download">Download</a></div></nav>
+<nav><b class="brand"><img src="https://lav1n.is-a.dev/Oneko-For-Windows/assets/oneko.ico" alt="" width="28" height="28"> Oneko</b><div><a href="#terminal">Terminal</a><a href="#download">Download</a></div></nav>
 
 <header class="hero">
-<span class="pill">v2.0 &nbsp;·&nbsp; free &nbsp;·&nbsp; one tiny .exe</span>
+<span class="pill">v1.1.0 &nbsp;·&nbsp; free &nbsp;·&nbsp; one tiny .exe</span>
 <h1>Oneko <span class="g">for Windows</span></h1>
 <p>A tiny pixel cat that chases your mouse around the screen. She never blocks a click, and she’s fully customizable.</p>
-<a class="btn b1" href="https://github.com/Lav1nRules/Oneko-for-Windows/releases/latest">⬇ Download for Windows</a>
-<a class="btn b2" href="https://github.com/Lav1nRules/Oneko-for-Windows">View on GitHub</a>
+<a class="btn b1" href="https://github.com/Lavin0503/Oneko-For-Windows/releases/latest/download/Oneko.exe">⬇ Download for Windows</a>
+<a class="btn b2" href="https://github.com/Lavin0503/Oneko-For-Windows">View on GitHub</a>
 <div class="hint">Go on, move your mouse — she’s already after it. 🐾</div>
 </header>
 
@@ -82,7 +86,7 @@ footer p{color:var(--mut)}
 <li><b>Double-click it.</b> If SmartScreen warns about an unknown publisher, choose “More info” then “Run anyway”.</li>
 <li><b>Find the cat</b> in the system tray (near the clock) to open settings, pause her or quit.</li>
 </ol>
-<p style="margin-top:22px"><a class="btn b1" href="https://github.com/Lav1nRules/Oneko-for-Windows/releases/latest" style="margin-left:0">⬇ Download Oneko.exe</a></p>
+<p style="margin-top:22px"><a class="btn b1" href="https://github.com/Lavin0503/Oneko-For-Windows/releases/latest/download/Oneko.exe" style="margin-left:0">⬇ Download Oneko.exe</a></p>
 </section>
 </div>
 
@@ -100,7 +104,7 @@ const SHEET="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAACACAYAAADktbcKA
 const cat=document.getElementById('cat');cat.style.backgroundImage=`url(${SHEET})`;
 const S={idle:[[3,3]],alert:[[7,3]],tired:[[3,2]],sleep:[[2,0],[2,1]],scratch:[[5,0],[6,0],[7,0]],
 N:[[1,2],[1,3]],NE:[[0,2],[0,3]],E:[[3,0],[3,1]],SE:[[5,1],[5,2]],S:[[6,3],[7,2]],SW:[[5,3],[6,1]],W:[[4,2],[4,3]],NW:[[1,0],[1,1]]};
-let x=90,y=170,mx=null,my=null,f=0,idle=0;
+let x=-30,y=170,mx=90,my=170,f=0,idle=0; // she runs in from the left when the page opens
 const set=(n,i)=>{const a=S[n],p=a[i%a.length];cat.style.backgroundPosition=`${-p[0]*40}px ${-p[1]*40}px`};
 const place=()=>{cat.style.transform=`translate(${x-20}px,${y-20}px)`};
 addEventListener('pointermove',e=>{mx=e.clientX;my=e.clientY},{passive:true});
@@ -116,11 +120,16 @@ setInterval(()=>{
  idle=0;
  const dir=(dy/d>.5?'N':'')+(dy/d<-.5?'S':'')+(dx/d>.5?'W':'')+(dx/d<-.5?'E':'');
  set(dir,f);
- x=Math.max(20,Math.min(innerWidth-20,x-dx/d*10));
+ x=Math.max(-40,Math.min(innerWidth-20,x-dx/d*10));
  y=Math.max(20,Math.min(innerHeight-20,y-dy/d*10));
  place();
 },100);
 place();set('idle',0);
+
+// sections fade in as you scroll
+document.querySelectorAll('section,footer .w').forEach(e=>e.classList.add('rv'));
+const io=new IntersectionObserver(es=>es.forEach(e=>e.isIntersecting&&e.target.classList.add('in')),{threshold:.12});
+document.querySelectorAll('.rv').forEach(e=>io.observe(e));
 
 // terminal demo: same sprite, normal vs pixelated
 const img=new Image();
